@@ -8,7 +8,7 @@ exports.wallets = (req, res) => {
 exports.getWallet = (req, res) => {
     res.send(`wallet id ${req.params.id} requested`);
 };
-//put /wallet #adds new wallet to table
+//post /wallet #adds new wallet to table
 exports.addWallet = (req, res) => {
     res.send(req.body);
 };
@@ -16,7 +16,7 @@ exports.addWallet = (req, res) => {
 exports.delWallet = (req, res) => {
     res.send(`wallet id ${req.params.id} deleted`);
 };
-//post /wallet/{1} #updates wallet with id 1
+//put /wallet/{1} #updates wallet with id 1
 exports.updateWallet = (req, res) => {
     res.send(`wallet id ${req.params.id} updated with ${req.body}`);
 };

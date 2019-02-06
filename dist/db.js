@@ -12,12 +12,12 @@ let connectDb = (mysql.createConnection({
     password: 'password',
     database: 'my_db'
 }));
-exports.queryRet = (sqlQuery) => {
+exports.queryRet = (sqlQuery, callback) => {
     connectDb.query(sqlQuery, (err, result) => {
         if (err)
             throw err;
-        console.log(result);
         exports.returnedRes = result;
+        return (callback(result));
     });
 };
 exports.queryNoRet = (sqlQuery) => {

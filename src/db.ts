@@ -15,11 +15,11 @@ let connectDb = (mysql.createConnection({
         database    : 'my_db'
     }))
 
-export let queryRet = (sqlQuery: string) => {
+export let queryRet = (sqlQuery: string, callback) => {
     connectDb.query(sqlQuery, (err, result) => {
             if (err) throw err;
-            console.log(result);
             returnedRes = result;
+            return(callback(result));
         });
 }
 

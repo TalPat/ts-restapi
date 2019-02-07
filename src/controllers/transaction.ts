@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import * as dbFunctions from "../db";
 import * as Joi from "joi";
+import * as jwt from "jsonwebtoken";
 
 //get /transaction #returns all transactions
 export let transactions = (req: Request, res: Response) => {
@@ -26,28 +27,37 @@ export let getTransaction = (req: Request, res: Response) => {
 
 //post /transaction #adds new transaction to table
 export let addTransaction = (req : Request, res: Response) => {
-    const schema = Joi.object().keys({
-        value: Joi.number().required(),
-        sourceid: Joi.number().required(),
-        destid: Joi.number().required()
-    });
-    const result = Joi.validate(req.body, schema);
-    console.log(result);
-    if (result.error) {
-        res.sendStatus(400);
-    }
-    else {
-        let keys: string = "";
-        let vals: string = "";
-        for (var k in req.body) {
-            keys += `${k},`;
-            vals += `'${req.body[k]}',`
+    jwt.verify(req.token, "secret", (err, authData) => {
+        if (err) {
+            console.log(err);
+            res.sendStatus(403);
         }
-        if (keys.length > 0) keys = keys.slice(0, -1);
-        if (vals.length > 0) vals = vals.slice(0, -1);
-        dbFunctions.queryNoRet(`INSERT INTO transactions (${keys}) VALUES (${vals})`);
-        res.send(JSON.stringify(req.body));
-    }
+        else {
+            const schema = Joi.object().keys({
+                value: Joi.number().required(),
+                sourceid: Joi.number().required(),
+                destid: Joi.number().required()
+            });
+            const result = Joi.validate(req.body, schema);
+            console.log(result);
+            if (result.error) {
+                res.sendStatus(400);
+            }
+            else {
+                let keys: string = "";
+                let vals: string = "";
+                for (var k in req.body) {
+                    keys += `${k},`;
+                    vals += `'${req.body[k]}',`
+                }
+                if (keys.length > 0) keys = keys.slice(0, -1);
+                if (vals.length > 0) vals = vals.slice(0, -1);
+                dbFunctions.queryNoRet(`INSERT INTO transactions (${keys}) VALUES (${vals})`);
+                res.send(JSON.stringify(req.body));
+            }
+        }
+    });
+    
 }
 
 //delete /transaction/{1} #removes transaction with id 1

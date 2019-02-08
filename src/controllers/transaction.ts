@@ -29,8 +29,7 @@ export let getTransaction = (req: Request, res: Response) => {
 export let addTransaction = (req : Request, res: Response) => {
     jwt.verify(req.token, "secret", (err, authData) => {
         if (err) {
-            console.log(err);
-            res.sendStatus(403);
+            res.status(403).send(err.message);
         }
         else {
             const schema = Joi.object().keys({
@@ -39,7 +38,8 @@ export let addTransaction = (req : Request, res: Response) => {
                 destid: Joi.number().required()
             });
             const result = Joi.validate(req.body, schema);
-            console.log(result);
+        //    console.log(result);
+        //    console.log(authData);
             if (result.error) {
                 res.sendStatus(400);
             }
@@ -62,43 +62,58 @@ export let addTransaction = (req : Request, res: Response) => {
 
 //delete /transaction/{1} #removes transaction with id 1
 export let delTransaction = (req : Request, res: Response) => {
-    dbFunctions.queryRet(`SELECT * FROM transactions WHERE transactionid = '${req.params.id}'`, (result) => {
-        if (result.length == 0) {
-            res.sendStatus(404);
+    // console.log(req.token);
+    jwt.verify(req.token, "secret", (err, authData) => {
+        if (err) {
+            res.status(403).send(err.message);
         }
         else {
-            dbFunctions.queryNoRet(`DELETE FROM transactions where transactionid = '${req.params.id}'`);
-            res.send(`transaction id: ${req.params.id} deleted`);
+            dbFunctions.queryRet(`SELECT * FROM transactions WHERE transactionid = '${req.params.id}'`, (result) => {
+                if (result.length == 0) {
+                    res.sendStatus(404);
+                }
+                else {
+                    dbFunctions.queryNoRet(`DELETE FROM transactions where transactionid = '${req.params.id}'`);
+                    res.send(`transaction id: ${req.params.id} deleted`);
+                }
+            });
         }
     });
 }
 
 //put /transaction/{1} #updates transaction with id 1
 export let updateTransaction = (req : Request, res: Response) => {
+    jwt.verify(req.token, "secret", (err, authData) => {
+        if (err) {
+            res.status(403).send(err.message);
+        }
+        else {
+            const result = Joi.validate(req.body, schema);
+            if (result.error) {
+                res.sendStatus(400)
+            }
+            else {
+                let str: string = "";
+                for (var k in req.body) {
+                    str += `${k}='${req.body[k]}',`;
+                }
+                if (str.length > 0) str = str.slice(0, -1);
+                dbFunctions.queryNoRet(`UPDATE transactions SET ${str} WHERE transactionid = '${req.params.id}'`);
+                dbFunctions.queryRet(`SELECT * FROM transactions WHERE transactionid = '${req.params.id}'`, (result) => {
+                    if (result.length == 0) {
+                    //    console.log(404);
+                        res.status(404);
+                        res.send("invalid id requested");
+                    }
+                    else
+                        res.json(result);
+                });
+            }
+        }
+    });
     const schema = Joi.object().keys({
         value: Joi.number(),
         sourceid: Joi.number(),
         destid: Joi.number()
     });
-    const result = Joi.validate(req.body, schema);
-    if (result.error) {
-        res.sendStatus(400)
-    }
-    else {
-        let str: string = "";
-        for (var k in req.body) {
-            str += `${k}='${req.body[k]}',`;
-        }
-        if (str.length > 0) str = str.slice(0, -1);
-        dbFunctions.queryNoRet(`UPDATE transactions SET ${str} WHERE transactionid = '${req.params.id}'`);
-        dbFunctions.queryRet(`SELECT * FROM transactions WHERE transactionid = '${req.params.id}'`, (result) => {
-            if (result.length == 0) {
-                console.log(404);
-                res.status(404);
-                res.send("invalid id requested");
-            }
-            else
-                res.json(result);
-        });
-    }
 }

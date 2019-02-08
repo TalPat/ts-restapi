@@ -11,16 +11,16 @@ app.set("port", 3000);
 app.use(bodyParser.json());
 
 app.get("/transactions", transaction.transactions);
-app.get("/transaction/:id", transaction.getTransaction);
+app.get("/transaction/:id/", transaction.getTransaction);
 app.post("/transaction", middleware.verifyToken, transaction.addTransaction);
-app.delete("/transaction/:id", transaction.delTransaction);
-app.put("/transaction/:id", transaction.updateTransaction);
+app.delete("/transaction/:id", middleware.verifyToken, transaction.delTransaction);
+app.put("/transaction/:id", middleware.verifyToken, transaction.updateTransaction);
 
 app.get("/wallets", wallet.wallets);
-app.get("/wallet/:id", wallet.getWallet);
-app.post("/wallet", wallet.addWallet);
-app.delete("/wallet/:id", wallet.delWallet);
-app.put("/wallet/:id", wallet.updateWallet);
+app.get("/wallet/:id/:transactions*?", wallet.getWallet);
+app.post("/wallet", middleware.verifyToken, wallet.addWallet);
+app.delete("/wallet/:id", middleware.verifyToken, wallet.delWallet);
+app.put("/wallet/:id", middleware.verifyToken, wallet.updateWallet);
 
 app.get("/initialise", dbController.initialise);
 app.get("/drop", dbController.drop);

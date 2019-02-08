@@ -9,12 +9,12 @@ exports.initialise = (req, res) => {
     };
     createdb(() => {
         dbFunctions.queryNoRet("CREATE TABLE IF NOT EXISTS wallets (\
-                                    walletid INT(10) UNSIGNED AUTO_INCREMENT PRIMARY KEY,\
+                                    walletid INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,\
                                     balance LONG,\
                                     holder VARCHAR(255) NOT NULL\
                                 )");
         dbFunctions.queryNoRet("CREATE TABLE IF NOT EXISTS transactions (\
-                                    transactionid INT(10) UNSIGNED AUTO_INCREMENT PRIMARY KEY,\
+                                    transactionid INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,\
                                     value LONG,\
                                     sourceid INT,\
                                     destid INT\

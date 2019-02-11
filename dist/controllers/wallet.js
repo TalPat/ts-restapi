@@ -101,7 +101,7 @@ exports.updateWallet = (req, res) => {
             const schema = Joi.object().keys({
                 balance: Joi.number(),
                 holder: Joi.string()
-            });
+            }).or('balance', 'holder');
             const result = Joi.validate(req.body, schema);
             if (result.error) {
                 res.sendStatus(400);

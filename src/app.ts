@@ -15,7 +15,7 @@ app.get("/transactions", transaction.transactions);
 app.get("/transaction/:id/", transaction.getTransaction);
 app.post("/transaction", middleware.verifyToken, transaction.addTransaction);
 app.delete("/transaction/:id", middleware.verifyToken, transaction.delTransaction);
-app.put("/transaction/:id", middleware.verifyToken, transaction.updateTransaction);
+app.put("/transaction/:id/:execute*?", middleware.verifyToken, transaction.updateTransaction);
 
 app.get("/wallets", wallet.wallets);
 app.get("/wallet/:id/:transactions*?", wallet.getWallet);
@@ -27,6 +27,7 @@ app.get("/initialise", dbController.initialise);
 app.get("/drop", dbController.drop);
 
 app.get("/getToken", jwtController.genToken);
+
 app.get("/exchange", exchange.getRates);
 
 app.listen(app.get("port"), () => {

@@ -85,33 +85,67 @@ exports.updateTransaction = (req, res) => {
             res.status(403).send(err.message);
         }
         else {
-            const result = Joi.validate(req.body, schema);
-            if (result.error) {
+            if (req.params.execute == 'execute') {
+                let successful = 1;
+                dbFunctions.queryRet(`SELECT * FROM transactions WHERE transactionid = '${req.params.id}'`, (result) => {
+                    if (result.length > 0) {
+                        dbFunctions.queryRet(`SELECT * FROM wallets WHERE walletid = '${result[0].sourceid}' OR walletid = '${result[0].destid}'`, (wResults) => {
+                            if (wResults.length > 2) {
+                                dbFunctions.queryRet(`SELECT * FROM wallets WHERE walletid = '${result[0].sourceid}'`, (wResult) => {
+                                    dbFunctions.queryNoRet(`UPDATE wallets SET balance = '${parseInt(wResult[0].balance) - parseInt(result[0].value)}' WHERE walletid = '${result[0].destid}'`);
+                                });
+                                dbFunctions.queryRet(`SELECT * FROM wallets WHERE walletid = '${result[0].destid}'`, (wResult) => {
+                                    dbFunctions.queryNoRet(`UPDATE wallets SET balance = '${parseInt(wResult[0].balance) + parseInt(result[0].value)}' WHERE walletid = '${result[0].destid}'`);
+                                });
+                            }
+                            else {
+                                successful = 0;
+                                //res.sendStatus(404);
+                                return;
+                            }
+                        });
+                    }
+                    else {
+                        successful = 0;
+                        //res.sendStatus(404);
+                    }
+                });
+                if (successful) {
+                    res.send('executed transaction');
+                }
+            }
+            else if (req.params.execute != null) {
                 res.sendStatus(400);
             }
             else {
-                let str = "";
-                for (var k in req.body) {
-                    str += `${k}='${req.body[k]}',`;
+                const schema = Joi.object().keys({
+                    value: Joi.number(),
+                    sourceid: Joi.number(),
+                    destid: Joi.number()
+                }).or('value', 'sourceid', 'destid');
+                const result = Joi.validate(req.body, schema);
+                if (result.error) {
+                    res.send(result.error.name).status(400);
                 }
-                if (str.length > 0)
-                    str = str.slice(0, -1);
-                dbFunctions.queryNoRet(`UPDATE transactions SET ${str} WHERE transactionid = '${req.params.id}'`);
-                dbFunctions.queryRet(`SELECT * FROM transactions WHERE transactionid = '${req.params.id}'`, (result) => {
-                    if (result.length == 0) {
-                        //    console.log(404);
-                        res.status(404);
-                        res.send("invalid id requested");
+                else {
+                    let str = "";
+                    for (var k in req.body) {
+                        str += `${k}='${req.body[k]}',`;
                     }
-                    else
-                        res.json(result);
-                });
+                    if (str.length > 0)
+                        str = str.slice(0, -1);
+                    dbFunctions.queryNoRet(`UPDATE transactions SET ${str} WHERE transactionid = '${req.params.id}'`);
+                    dbFunctions.queryRet(`SELECT * FROM transactions WHERE transactionid = '${req.params.id}'`, (result) => {
+                        if (result.length == 0) {
+                            //    console.log(404);
+                            res.status(404);
+                            res.send("invalid id requested");
+                        }
+                        else
+                            res.json(result);
+                    });
+                }
             }
         }
-    });
-    const schema = Joi.object().keys({
-        value: Joi.number(),
-        sourceid: Joi.number(),
-        destid: Joi.number()
     });
 };

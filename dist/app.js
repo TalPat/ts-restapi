@@ -7,6 +7,7 @@ const bodyParser = require("body-parser");
 const dbController = require("./controllers/dbController");
 const jwtController = require("./controllers/jwtcontroller");
 const middleware = require("./middleware");
+const exchange = require("./controllers/exchangeController");
 const app = express();
 app.set("port", 3000);
 app.use(bodyParser.json());
@@ -23,6 +24,7 @@ app.put("/wallet/:id", middleware.verifyToken, wallet.updateWallet);
 app.get("/initialise", dbController.initialise);
 app.get("/drop", dbController.drop);
 app.get("/getToken", jwtController.genToken);
+app.get("/exchange", exchange.getRates);
 app.listen(app.get("port"), () => {
     console.log("server running on port %d", app.get("port"));
 });

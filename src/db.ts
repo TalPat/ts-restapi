@@ -18,8 +18,7 @@ let connectDb = (mysql.createConnection({
 export let queryRet = (sqlQuery: string, callback) => {
     connectDb.query(sqlQuery, (err, result) => {
             if (err) throw err;
-            returnedRes = result;
-            return(callback(result));
+            callback(result);
         });
 }
 

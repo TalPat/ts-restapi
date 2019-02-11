@@ -5,6 +5,7 @@ import * as bodyParser from "body-parser";
 import * as dbController from "./controllers/dbController";
 import * as jwtController from "./controllers/jwtcontroller";
 import * as middleware from "./middleware";
+import * as exchange from "./controllers/exchangeController";
 
 const app = express();
 app.set("port", 3000);
@@ -26,6 +27,7 @@ app.get("/initialise", dbController.initialise);
 app.get("/drop", dbController.drop);
 
 app.get("/getToken", jwtController.genToken);
+app.get("/exchange", exchange.getRates);
 
 app.listen(app.get("port"), () => {
     console.log("server running on port %d", app.get("port"));

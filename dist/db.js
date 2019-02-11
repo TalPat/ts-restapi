@@ -16,8 +16,7 @@ exports.queryRet = (sqlQuery, callback) => {
     connectDb.query(sqlQuery, (err, result) => {
         if (err)
             throw err;
-        exports.returnedRes = result;
-        return (callback(result));
+        callback(result);
     });
 };
 exports.queryNoRet = (sqlQuery) => {

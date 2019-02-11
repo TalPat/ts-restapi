@@ -6,8 +6,8 @@ exports.verifyToken = (req, res, next) => {
     if (bearerHeader) {
         const bearer = bearerHeader.split(' ');
         const bearerToken = bearer[1];
-        req.token = bearerToken;
-        // console.log(bearerHeader);
+        //console.log(req.token);
+        req['token'] = bearerToken;
         next();
     }
     else {

@@ -26,6 +26,9 @@ exports.getWallet = (req, res) => {
                 res.json(result);
         });
     }
+    else if (req.params.transactions !== null) {
+        res.sendStatus(400);
+    }
     else {
         dbFunctions.queryRet(`SELECT * FROM wallets WHERE walletid = '${req.params.id}'`, (result) => {
             if (result.length == 0) {

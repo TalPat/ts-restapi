@@ -93,13 +93,14 @@ export let updateTransaction = (req : Request, res: Response) => {
                 dbFunctions.queryRet(`SELECT * FROM transactions WHERE transactionid = '${req.params.id}'`, (result) => {
                     if (result.length > 0) {
                         dbFunctions.queryRet(`SELECT * FROM wallets WHERE walletid = '${result[0].sourceid}' OR walletid = '${result[0].destid}'`, (wResults) => {
-                            if (wResults.length > 2) {
+                            if (wResults.length > 1) {
                                 dbFunctions.queryRet(`SELECT * FROM wallets WHERE walletid = '${result[0].sourceid}'`, (wResult) => {
-                                    dbFunctions.queryNoRet(`UPDATE wallets SET balance = '${parseInt(wResult[0].balance) - parseInt(result[0].value)}' WHERE walletid = '${result[0].destid}'`);
+                                    dbFunctions.queryNoRet(`UPDATE wallets SET balance = '${parseInt(wResult[0].balance) - parseInt(result[0].value)}' WHERE walletid = '${result[0].sourceid}'`);
                                 });
                                 dbFunctions.queryRet(`SELECT * FROM wallets WHERE walletid = '${result[0].destid}'`, (wResult) => {
                                     dbFunctions.queryNoRet(`UPDATE wallets SET balance = '${parseInt(wResult[0].balance) + parseInt(result[0].value)}' WHERE walletid = '${result[0].destid}'`);
                                 });
+                                // console.log("successful update")
                             }
                             else {
                                 successful = 0;
@@ -114,7 +115,7 @@ export let updateTransaction = (req : Request, res: Response) => {
                     }
                 });
                 if (successful) {
-                    res.send('executed transaction');
+                    res.send('attempted transaction');
                 }               
             }
             else if (req.params.execute != null) {
